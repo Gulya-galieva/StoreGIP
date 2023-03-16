@@ -1,0 +1,1454 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StoreGIPManager</name>
+    </assembly>
+    <members>
+        <member name="P:GIPManager.Worker.PaymentReports">
+            <summary> Отчеты на оплату </summary>
+        </member>
+        <member name="T:GIPManager.MounterReportImportError">
+            <summary>
+            Коды ошибок иморта ТУ
+            </summary>
+        </member>
+        <member name="F:GIPManager.MounterReportImportError.None">
+            <summary>
+            Нет ошибок
+            </summary>
+        </member>
+        <member name="F:GIPManager.MounterReportImportError.ExistingRegPoint">
+            <summary>
+            Устройство уже привязано к активной ТУ
+            </summary>
+        </member>
+        <member name="F:GIPManager.MounterReportImportError.DeviceNotFound">
+            <summary>
+            Оборудование не найдено в БД по серийному номеру
+            </summary>
+        </member>
+        <member name="F:GIPManager.MounterReportImportError.WrongState">
+            <summary>
+            Текущий статус ПУ не позвляет произвести импорт
+            </summary>
+        </member>
+        <member name="T:GIPManager.Link">
+            <summary>
+            Сущность Номер сим и тип модема для ПУ
+            </summary>
+        </member>
+        <member name="T:GIPManager.SubstationLink">
+            <summary>
+            Сущность Номер сим для ТП
+            </summary>
+        </member>
+        <member name="T:GIPManager.CommentRegPoint">
+            <summary>
+            Сущность комментарии к точке учета
+            </summary>
+        </member>
+        <member name="T:GIPManager.ActionType">
+            <summary>
+            Сущность - тип действия совершаемого пользователем. Содержит в себе имя действия типа string.
+            </summary>
+        </member>
+        <member name="T:GIPManager.RegPointAction">
+            <summary>
+            Сущность - Действие совершаемое пользователем на точкой учета. Содержит дату действия, тип действия, пользователя [и комментарий].
+            </summary>
+        </member>
+        <member name="T:GIPManager.RegPointStatus">
+            <summary>Статус точки учета </summary>
+        </member>
+        <member name="F:GIPManager.RegPointStatus.Default">
+            <summary> Обычная активная точка учета </summary>
+        </member>
+        <member name="F:GIPManager.RegPointStatus.Demounted">
+            <summary> Демонтированый ПУ </summary>
+        </member>
+        <member name="F:GIPManager.RegPointStatus.USPD">
+            <summary> Точка учета для привязки УСПД к Подстанции </summary>
+        </member>
+        <member name="T:GIPManager.RegPoint">
+            <summary>
+            Сущность - Точка учета. Связана с сущностями, которые содержат всю информацию о точке учета, акте, потребителе, приборе учета и тд.
+            </summary>
+        </member>
+        <member name="P:GIPManager.RegPoint.Status">
+            <summary> Статус точки учета </summary>
+        </member>
+        <member name="T:GIPManager.RegPointFlags">
+            <summary>
+            Сущность - Флаги точки учета. Содержит флаги описывающие состояния точки учета.
+            </summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.RegPointId">
+            <summary>Id точки учета, к которой относятся эти флаги</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.RegPoint">
+            <summary>Точка учета, к которой относятся эти флаги</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.ImportConsummerData">
+            <summary>Данные о потребителе предоставлены из вне (или импортированы)</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.ExsistRegDevice">
+            <summary>Акт на существующий ПУ, которого нет в базе</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.ReportedByMounter">
+            <summary>ТУ создана из отчета монтажника</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.IsLinkOk">
+            <summary>Есть связь с ПУ (первоначальная проверка после ПНР)</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.IsAscueChecked">
+            <summary>ПУ повторно проверен и будет заведён в ПО АСКУЭ</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.IsAscueOk">
+            <summary>ПУ работает в ПО АСКУЭ</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.IsReplace">
+            <summary>Замена ПУ</summary>
+        </member>
+        <member name="P:GIPManager.RegPointFlags.IsDataConfirmed">
+            <summary>Данные из ЭСКБ корректны</summary>
+        </member>
+        <member name="M:GIPManager.RegPointFlags.CopyDataFrom(GIPManager.RegPointFlags)">
+            <summary>
+            Копировать значения всех полей из другого объекта
+            </summary>
+            <param name="flagsFrom">Объект из которого будут скопированы все поля</param>
+        </member>
+        <member name="T:GIPManager.PaymentReport">
+            <summary>
+            Отчеты для оплаты работ по СМР
+            </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.Id">
+            <summary> Id отчета на оплату СМР </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.DateCreate">
+            <summary> Если отчет закрыт, то его нельзя редактировать (он оплачен) </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.DatePeriodStart">
+            <summary> Дата начала периода отчета (1.02 или 15.02, первая или вторая половина месяца </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.IsClosed">
+            <summary> Если отчет закрыт, то его нельзя редактировать (он оплачен) </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.PaymentReportRegPoints">
+            <summary> Список устройств прикрепленных к отчету </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.Comment">
+            <summary> Коментарий к отчету (любой) </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.WorkerId">
+            <summary> Id работника, по которому отчет </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReport.Worker">
+            <summary> Работник, по которому отчет </summary>
+        </member>
+        <member name="T:GIPManager.PaymentReportWorkType">
+            <summary> Тип работы произведенной монтажником </summary>
+        </member>
+        <member name="F:GIPManager.PaymentReportWorkType.None">
+            <summary> Не определено </summary>
+        </member>
+        <member name="F:GIPManager.PaymentReportWorkType.Mounting">
+            <summary> Монтаж </summary>
+        </member>
+        <member name="F:GIPManager.PaymentReportWorkType.Demounting">
+            <summary> Демонтаж </summary>
+        </member>
+        <member name="F:GIPManager.PaymentReportWorkType.PNR">
+            <summary> Пуско-наладка </summary>
+        </member>
+        <member name="T:GIPManager.PaymentReportRegPoint">
+            <summary> Связь между точками учета и отчетами на оплату </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.RegPointId">
+            <summary> Точка учета, которая привязывается к отчету </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.RegPoint">
+            <summary> Точка учета, которая привязывается к отчету </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.PaymentReportId">
+            <summary> Отчет к которому привязывается устройство </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.PaymentReport">
+            <summary> Отчет к которому привязывается устройство </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.WorkType">
+            <summary> Тип работы произведенной монтажником </summary>
+        </member>
+        <member name="P:GIPManager.PaymentReportRegPoint.CostRUB">
+            <summary> Цена за СМР ПУ </summary>
+        </member>
+        <member name="T:GIPManager.InstallActType">
+            <summary> Тип акта не задан</summary>
+        </member>
+        <member name="F:GIPManager.InstallActType.None">
+            <summary> Тип акта не задан </summary>
+        </member>
+        <member name="F:GIPManager.InstallActType.Consummer">
+            <summary> Акт с потребителем </summary>
+        </member>
+        <member name="F:GIPManager.InstallActType.NoComsummer">
+            <summary> Акт без потребителя </summary>
+        </member>
+        <member name="F:GIPManager.InstallActType.VL">
+            <summary>ВЛ (воздушные линии) </summary>
+        </member>
+        <member name="T:GIPManager.InstallAct">
+            <summary>
+            Сущность - Акт. Содержит основную информацию для акта допуска.
+            </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Id">
+            <summary> Id </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.RegPointId">
+            <summary> Id точки учета </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.RegPoint">
+            <summary> Навигационное свойсво </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.IsCommReg">
+            <summary>
+            Тип учета (true - Коммерческий учет, false - технический учет)
+            </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.PS">
+            <summary> Подстанция (высокая сторона) название (вообще вроде не нужно ???) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Line">
+            <summary> Линия (обычно номер 1, 2 и тд.) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Feeder">
+            <summary> Фидер (обычно номер 1, 2 и тд.) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Section">
+            <summary> Секция (обычно номер 1 или 2) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.IsOutFlow">
+            <summary> Переток (true - Отдача (Ввод), false - Прием (ВЛ и др) )  </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.InstallPlaceNumber">
+            <summary> Место установки - Номер (Ввод №1 или Рубильник №7 или Опора №3) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.InstallPlaceTypeId">
+            <summary> Место установки - Id Типа (Ввод, Рубильник или Опора) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.InstallPlaceType">
+            <summary> Место установки - Тип (Ввод, Рубильник или Опора) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Uninstalled_Serial">
+            <summary> Серийник </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Uninstalled_TSum">
+            <summary> Последние показания </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Uninstalled_Ktt">
+            <summary> Коэффициент трансформатора тока </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Tsum">
+            <summary> Суммарный расход (поле в акте) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.T1">
+            <summary>  Расход по первому тарифу (поле в акте) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.T2">
+            <summary>  Расход по второму тарифу (поле в акте) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.TT_A_Serial">
+            <summary> Серийник </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.TT_B_Serial">
+            <summary> Серийник </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.TT_C_Serial">
+            <summary> Серийник </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.TT_Koefficient">
+            <summary> Серийник </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_TT_A">
+            <summary> Номер пломбы ТТ фаза A </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_TT_B">
+            <summary> Номер пломбы ТТ фаза B </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_TT_C">
+            <summary> Номер пломбы ТТ фаза C </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_RegDevice">
+            <summary> Номер пломбы на счетчике </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_KI">
+            <summary> Номер пломбы КИ (клемма испытательная) </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_KDE">
+            <summary> Номер пломбы КДЕ </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_AV1">
+            <summary> Номер пломбы автомата 1 </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.Seal_AV2">
+            <summary> Номер пломбы автомата 2 </summary>
+        </member>
+        <member name="P:GIPManager.InstallAct.InstallActType">
+            <summary> Тип акта (ВЛ, с потребителем, без потребителя) </summary>
+        </member>
+        <member name="M:GIPManager.InstallAct.CopyDataFrom(GIPManager.InstallAct)">
+            <summary>
+            Копировать значения всех полей из другого объекта
+            </summary>
+            <param name="installActFrom">Объект из которого будут скопированы все поля</param>
+        </member>
+        <member name="T:GIPManager.InstallPlaceType">
+            <summary>
+            Сущность - Тип места установки. Содержит информацию о месте установки точки учета.
+            </summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceType.Id">
+            <summary>Id </summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceType.Name">
+            <summary>Текстовое описание места установки (заканчивается на №)</summary>
+        </member>
+        <member name="T:GIPManager.Consumer">
+            <summary>
+            Сущность - Потребитель. Содержит информацию о потребителе, связанным с точкой учета.
+            </summary>
+        </member>
+        <member name="M:GIPManager.Consumer.CopyDataFrom(GIPManager.Consumer)">
+            <summary>
+            Копировать значения всех полей из другого объекта
+            </summary>
+            <param name="consumerFrom">Объект из которого будут скопированы все поля</param>
+        </member>
+        <member name="T:GIPManager.Letter">
+            <summary>
+            Сущность - Письмо. Содержит информацию для писем приглашений на допуск ПУ.
+            </summary>
+        </member>
+        <member name="M:GIPManager.Letter.CopyDataFrom(GIPManager.Letter)">
+            <summary>
+            Копировать значения всех полей из другого объекта
+            </summary>
+            <param name="letterFrom">Объект из которого будут скопированы все поля</param>
+        </member>
+        <member name="P:GIPManager.Substation.IsInstallationDone">
+            <summary> СМР закончены </summary>
+        </member>
+        <member name="P:GIPManager.Substation.IsPropSchemeDone">
+            <summary> Поопроные схемы готовы </summary>
+        </member>
+        <member name="P:GIPManager.Substation.IsBalanceDone">
+            <summary> Баланс сведен </summary>
+        </member>
+        <member name="P:GIPManager.Substation.IsKS2Done">
+            <summary> КС-2  сделана </summary>
+        </member>
+        <member name="T:GIPManager.SubstationDevice">
+             <summary>
+            Оборудованние установленное на подстанции
+             </summary>
+        </member>
+        <member name="T:GIPManager.ActionTypeName">
+            <summary>Перечисление действий которые может совершить User над RegPoint или Substation</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.Name">
+            <summary>
+            Название типа в виде строки (также и в БД)
+            </summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.Undefined">
+            <summary>Пустая строка - ""</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.Create">
+            <summary>"Создал"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.Edit">
+            <summary>"Изменил"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.Delete">
+            <summary>"Удалил"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.AddRegPoint">
+            <summary>"Добавил точку учета"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.RemoveRegPoint">
+            <summary>"Добавил точку учета"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.AddSubstation">
+            <summary>"Добавил точку учета"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.RemoveSubstation">
+            <summary>"Добавил точку учета"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.RenameSubstation">
+            <summary>"Переименовал подстанцию"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.EditConsummer">
+            <summary>"Изменил данные о потребителе"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.EditInstallAct">
+            <summary>"Изменил данные акта допуска"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.FlagSet">
+            <summary>"Установил флаг"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.FlagReset">
+            <summary>"Сбросил флаг"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.LetterAdd">
+            <summary>"Создал письмо"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.LetterDelete">
+            <summary>"Удалил письмо"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.LetterPrint">
+            <summary>"Распечатал письмо"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.LetterTrackNumEdit">
+            <summary>"Изменил Track номер письма"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.AddComment">
+            <summary>"Добавил комментарий"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.DeleteComment">
+            <summary>"Удалил комментарий"</summary>
+        </member>
+        <member name="P:GIPManager.ActionTypeName.ReplaceRegPoint">
+            <summary>"Перенес точку учета"</summary>
+        </member>
+        <member name="M:GIPManager.ActionTypeName.ToString">
+            <summary>Текстовое описание текущего типа действия</summary>
+        </member>
+        <member name="T:GIPManager.WorkerTypeName">
+            <summary>Перечисление типов работника</summary>
+        </member>
+        <member name="P:GIPManager.WorkerTypeName.Name">
+            <summary>
+            Название типа в виде строки (также и в БД)
+            </summary>
+        </member>
+        <member name="P:GIPManager.WorkerTypeName.Mounter">
+            <summary>"монтажник"</summary>
+        </member>
+        <member name="P:GIPManager.WorkerTypeName.Assembler">
+            <summary>"сборщик"</summary>
+        </member>
+        <member name="P:GIPManager.WorkerTypeName.Tuner">
+            <summary>"настройщик"</summary>
+        </member>
+        <member name="P:GIPManager.WorkerTypeName.PNR">
+            <summary>"пнр"</summary>
+        </member>
+        <member name="M:GIPManager.WorkerTypeName.ToString">
+            <summary>Текстовое описание текущего типа работника</summary>
+        </member>
+        <member name="T:GIPManager.DeviceStateTypeName">
+            <summary>Перечисление статусов которые может иметь Device</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.Name">
+            <summary>
+            Название типа в виде строки (также и в БД)
+            </summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.Undefined">
+            <summary>Пустая строка - ""</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.Income">
+            <summary>"прием на склад"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.ToAssembly">
+            <summary>"выдача на сборку"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.ToTune">
+            <summary>"выдача на настройку"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.Outcome">
+            <summary>"выдача со склада"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.Defect">
+            <summary>"брак"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.DefectDelete">
+            <summary>"удаление из брака"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.FromTune">
+            <summary>"возврат с настройки"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.FromAssembly">
+            <summary>"возврат со сборки"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.ReturnToStore">
+            <summary>"возврат на склад"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.ReturnToMnfc">
+            <summary>"возврат производителю"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.AddToReport">
+            <summary>"включен в отчет"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.DeleteFromReport">
+            <summary>"удален из отчета"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.AcceptedByCurator">
+            <summary>"принят куратором"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.AddToKDE">
+            <summary>"привязан к КДЕ"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.DeleteFromKDE">
+            <summary>"удален из КДЕ"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.AddToTU">
+            <summary>"привязан к ту"</summary>
+        </member>
+        <member name="P:GIPManager.DeviceStateTypeName.DeleteFromTU">
+            <summary>"отвязан от ту"</summary>
+        </member>
+        <member name="M:GIPManager.DeviceStateTypeName.ToString">
+            <summary>Текстовое описание текущего статуса</summary>
+        </member>
+        <member name="T:GIPManager.ReportStateTypeName">
+            <summary> Перечисление типов состояния отчета </summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.Name">
+            <summary> Название типа состояния отчета</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.InWork">
+            <summary>"в работе"</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.SentToCurator">
+            <summary>"отправлен куратору"</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.AcceptedByCurator">
+            <summary>"принят куратором"</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.RemarksByCurator">
+            <summary>"с замечаниями куратора"</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.Imported">
+            <summary>"импортирован"</summary>
+        </member>
+        <member name="P:GIPManager.ReportStateTypeName.ForImport">
+            <summary>"для импорта"</summary>
+        </member>
+        <member name="M:GIPManager.ReportStateTypeName.ToString">
+            <summary>Текстовое описание текущего типа состояния отчета</summary>
+        </member>
+        <member name="T:GIPManager.InstallPlaceTypeName">
+            <summary> Перечисление типов Link </summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Name">
+            <summary> Название типа</summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Undefined">
+            <summary>Пустая строка - ""</summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Rub">
+            <summary>"РУ-0,4 кВ, руб-к №"</summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Vvod">
+            <summary>"РУ-0,4 кВ, ввод №"</summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Opora">
+            <summary>"ВЛ-0,4 кВ, опора №"</summary>
+        </member>
+        <member name="P:GIPManager.InstallPlaceTypeName.Fasad">
+            <summary>"ВЛ-0,4 кВ, фасад №"</summary>
+        </member>
+        <member name="M:GIPManager.InstallPlaceTypeName.ToString">
+            <summary>Текстовое описание текущего типа Link</summary>
+        </member>
+        <member name="T:GIPManager.SubstationStateName">
+            <summary> Перечисление состояний подстанции (для ПНР) </summary>
+        </member>
+        <member name="P:GIPManager.SubstationStateName.Name">
+            <summary> Название типа</summary>
+        </member>
+        <member name="P:GIPManager.SubstationStateName.Undefined">
+            <summary>Пустая строка - ""</summary>
+        </member>
+        <member name="M:GIPManager.SubstationStateName.ToString">
+            <summary>Текстовое описание текущего типа</summary>
+        </member>
+        <member name="T:GIPManager.LinkTypeName">
+            <summary> Перечисление типов Link (НЕТ В БАЗЕ, просто текст) </summary>
+        </member>
+        <member name="P:GIPManager.LinkTypeName.Name">
+            <summary> Название типа</summary>
+        </member>
+        <member name="P:GIPManager.LinkTypeName.Undefined">
+            <summary>Пустая строка - ""</summary>
+        </member>
+        <member name="P:GIPManager.LinkTypeName.BuiltIn">
+            <summary>"Встроенный GSM-модуль"</summary>
+        </member>
+        <member name="P:GIPManager.LinkTypeName.External">
+            <summary>"Внешний GSM модем"</summary>
+        </member>
+        <member name="M:GIPManager.LinkTypeName.ToString">
+            <summary>Текстовое описание текущего типа Link</summary>
+        </member>
+        <member name="T:GIPManager.Helper">
+            <summary>
+            Класс для методов расширений
+            </summary>
+        </member>
+        <member name="M:GIPManager.Helper.IsWorkerType(GIPManager.Worker,GIPManager.WorkerTypeName)">
+            <summary>
+            Проверка типа (или должности) работника 
+            </summary>
+            <returns>Возвращает true если тип совпадает с workerTypeName</returns>
+        </member>
+        <member name="M:GIPManager.Helper.SetWorkerTypeId(GIPManager.Worker,GIPManager.WorkerTypeName)">
+            <summary>
+            Задать работнику его тип (или должность) из WorkerTypeName.[ТипНаВыбор]
+            Устанавливает только внешний ключ WorkerTypeId.
+            </summary>
+        </member>
+        <member name="M:GIPManager.Helper.GetFullName(GIPManager.Worker)">
+            <summary> Получить полное имя работника в формате "[Фамилия] [Имя] [Отчество]" </summary>
+            <param name="worker"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.IsCurrentState(GIPManager.Device,GIPManager.DeviceStateTypeName)">
+            <summary>
+            Проверка текущего состояния счетчика
+            </summary>
+            <returns>Возвращает true если состояние совпадает с deviceStateTypeName</returns>
+        </member>
+        <member name="M:GIPManager.Helper.IsEnableToAddTU(GIPManager.Device)">
+            <summary>
+            Проверяет можно ли устройство (ПУ) прикрепить к ТУ (точке учета)
+            </summary>
+            <param name="device"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.IsEnableToImportTU(GIPManager.Device)">
+            <summary>
+            Проверяет можно ли устройство (ПУ) импортировать (точке учета)
+            </summary>
+            <param name="device"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddState(GIPManager.Device,GIPManager.DeviceStateTypeName,System.Int32,System.String)">
+            <summary>
+            Добавить действие над Оборудованием
+            </summary>
+            <param name="device"></param>
+            <param name="typeName">Тип действия из списка</param>
+            <param name="userId">Id пользователя который совершает действие</param>
+            <param name="comment">Если не нужен текстовый комментарий, то подствьте null</param>
+        </member>
+        <member name="M:GIPManager.Helper.AddAction(GIPManager.RegPoint,GIPManager.ActionTypeName,System.Int32,System.String)">
+            <summary>
+            Добавить действие над Точкой учета
+            </summary>
+            <param name="regPoint"></param>
+            <param name="actionTypeName">Тип действия из списка</param>
+            <param name="userId">Id пользователя который совершает действие</param>
+            <param name="comment">Если не нужен текстовый комментарий, то подствьте null</param>
+        </member>
+        <member name="M:GIPManager.Helper.Remove(GIPManager.RegPoint,System.Int32)">
+            <summary> Удаляет точку учета и всю связанную с ней информацию (если она добавлена вручную) </summary>
+            <param name="rp"></param>
+            <param name="userId">Id пользователя который удаляет точку учета</param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.RemoveForce(GIPManager.RegPoint,System.Int32)">
+            <summary> Удаляет точку учета и всю связанную с ней информацию (даже если импортирована из отчета) </summary>
+            <param name="rp"></param>
+            <param name="userId">Id пользователя который удаляет точку учета</param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddAction(GIPManager.Substation,GIPManager.ActionTypeName,System.Int32,System.String)">
+            <summary>
+            Добавить действие над Подстанцией
+            </summary>
+            <param name="substation"></param>
+            <param name="actionTypeName">Тип действия из списка</param>
+            <param name="userId">Id пользователя который совершает действие</param>
+            <param name="comment">Если не нужен текстовый комментарий, то подствьте null</param>
+        </member>
+        <member name="M:GIPManager.Helper.AddRegPoint(GIPManager.Substation,System.Int32,System.Int32)">
+            <summary>
+            Добавляет новую точку учета и создает все связанные записи в БД. Так же добавляет действие Create для этой точки.
+            </summary>
+            <param name="substation"></param>
+            <param name="deviceId">Id привязанного к точке прибора учета</param>
+            <param name="userId">Id пользователя, который создает эту точку учета</param>
+        </member>
+        <member name="M:GIPManager.Helper.AddRegPoint(GIPManager.Substation,System.Int32,System.Int32,GIPManager.RegPointFlags,GIPManager.InstallAct,GIPManager.Consumer)">
+            <summary>
+            Добавляет новую точку учета и создает все связанные записи в БД. Так же добавляет действие Create для этой точки.
+            </summary>
+            <param name="substation"></param>
+            <param name="deviceId">Id привязанного к точке прибора учета</param>
+            <param name="userId">Id пользователя, который создает эту точку учета</param>
+            <param name="regPointFlagsData">Объект с флагами. Если нет первоначальных данных, то отправляй null</param>
+            <param name="installActData">Инфа для акта. Если нет первоначальных данных, то отправляй null</param>
+            <param name="consumerData">Инфа о потребителе. Если нет первоначальных данных, то отправляй null</param>
+        </member>
+        <member name="M:GIPManager.Helper.Remove(GIPManager.Substation,System.Int32)">
+            <summary>
+            Удаляет подстанцию и всю связанную с ней информацию (действия и точки учета)
+            </summary>
+            <param name="sub"></param>
+            <param name="userId">Id пользователя который удаляет подстанцию</param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddAction(GIPManager.NetRegion,GIPManager.ActionTypeName,System.Int32,System.String)">
+            <summary>
+            Добавляет действие на Регионом (районом)
+            </summary>
+            <param name="netRegion"></param>
+            <param name="actionTypeName">Тип действия из списка</param>
+            <param name="userId">Id пользователя который совершает действие</param>
+            <param name="comment">Если не нужен текстовый комментарий, то подствьте null</param>
+        </member>
+        <member name="M:GIPManager.Helper.AddSubstation(GIPManager.NetRegion,System.String,System.Int32)">
+            <summary>
+            Проверяет есть ли подстанция с таким же именем, и если нет, то добавляет и создает действие Create для подстанции. Данные добавляются только в контекст, db.SaveChanges() нужно вызывать вручную.
+            </summary>
+            <param name="netRegion"></param>
+            <param name="substationName">Имя новой подстанции</param>
+            <param name="userId">Id пользователя, который выполняет это действие</param>
+            <returns>Возвращает сообщение (string) о результате выполнения</returns>
+        </member>
+        <member name="M:GIPManager.Helper.ChangeState(GIPManager.MounterReportUgesAL,GIPManager.ReportStateTypeName)">
+            <summary>
+            Изменить статус отчета ВЛ
+            </summary>
+            <param name="report">Изменяемый отчет</param>
+            <param name="stateTypeName">Новый тип состояния отчета</param>
+        </member>
+        <member name="M:GIPManager.Helper.ChangeState(GIPManager.SBReport,GIPManager.ReportStateTypeName)">
+            <summary>
+            Изменить статус отчета ТП/РП
+            </summary>
+            <param name="report">Изменяемый отчет</param>
+            <param name="stateTypeName">Новый тип состояния отчета</param>
+        </member>
+        <member name="M:GIPManager.Helper.ChangeState(GIPManager.USPDReport,GIPManager.ReportStateTypeName)">
+            <summary>
+            Изменить статус отчета УСПД
+            </summary>
+            <param name="report">Изменяемый отчет</param>
+            <param name="stateTypeName">Новый тип состояния отчета</param>
+        </member>
+        <member name="M:GIPManager.Helper.ChangeState(GIPManager.UnmountReport,GIPManager.ReportStateTypeName)">
+            <summary>
+            Изменить статус отчета Демонтажа
+            </summary>
+            <param name="report">Изменяемый отчет</param>
+            <param name="stateTypeName">Новый тип состояния отчета</param>
+        </member>
+        <member name="M:GIPManager.Helper.FormatAddress(GIPManager.Consumer,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="consumer"></param>
+            <param name="Local"></param>
+            <param name="Local_Secondary"></param>
+            <param name="Street"></param>
+            <param name="House"></param>
+            <param name="Build"></param>
+            <param name="Flat"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.FormatOAddress(GIPManager.Consumer)">
+            <summary>
+            Получить отформатированный Адрес объекта потребителя
+            </summary>
+            <param name="consumer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.FormatUAddress(GIPManager.Consumer)">
+            <summary>
+            Получить отформатированный юридический Адрес потребителя
+            </summary>
+            <param name="consumer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.GetPeriodString(GIPManager.PaymentReport)">
+            <summary>
+            Приводит период отчета в формат "с [начало периода] по [конец периода]"
+            </summary>
+            <param name="report"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditOrder(GIPManager.OrderTable,System.Int32,System.String,System.Int32,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <param name="itemid"></param>
+            <param name="comment"></param>
+            <param name="timeid"></param>
+            <param name="user"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditOrder(GIPManager.OrderTablePermission,System.Int32,System.String,System.Int32,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTablePermission"></param>
+            <param name="itemid"></param>
+            <param name="comment"></param>
+            <param name="workerid"></param>
+            <param name="user"></param>
+            <param name="timeid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddOrder(GIPManager.OrderTablePermission,System.Int32,System.String,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTablePermission"></param>
+            <param name="itemid"></param>
+            <param name="comment"></param>
+            <param name="user"></param>
+            <param name="workerid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddOrder(GIPManager.OrderTable,System.String,System.Int32,System.Int32,System.Int32,System.DateTime,System.DateTime,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Добавление заявки
+            </summary>
+            <param name="orderTable"></param>
+            <param name="description"></param>
+            <param name="type"></param>
+            <param name="Id_Sub"></param>
+            <param name="id_work"></param>
+            <param name="startDate"></param>
+            <param name="end"></param>
+            <param name="worker_one"></param>
+            <param name="worker_two"></param>
+            <param name="worker_three"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.ChangeOrder(GIPManager.OrderTable,System.Int32,System.DateTime,System.DateTime,System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <param name="id"></param>
+            <param name="startDate"></param>
+            <param name="end"></param>
+            <param name="description"></param>
+            <param name="worker_one"></param>
+            <param name="worker_two"></param>
+            <param name="worker_three"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.CheckOrderTable(GIPManager.OrderTable)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.ChecOrderTable(GIPManager.OrderTable)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddInArchive(GIPManager.ArchiveOrder,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="archiveOrder"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteOrder(GIPManager.OrderTable,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.ReplacementOrder(GIPManager.OrderTable,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.FinishOrder(GIPManager.OrderTable,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="orderTable"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteDuty(GIPManager.DutyScheduleTable)">
+            <summary>
+            
+            </summary>
+            <param name="dutyScheduleTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddDuty(GIPManager.DutyScheduleTable,System.Int32,System.DateTime,System.DateTime,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="dutyScheduleTable"></param>
+            <param name="id_disp"></param>
+            <param name="sDate"></param>
+            <param name="eDate"></param>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.PassShift(GIPManager.ShiftSchedule,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="shiftSchedule"></param>
+            <param name="id_user"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AcceptShift(GIPManager.ShiftSchedule,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="shiftSchedule"></param>
+            <param name="id_user"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddAllAlert(GIPManager.AllAlertTable,System.String,System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="allAlertTable"></param>
+            <param name="comment"></param>
+            <param name="fromuser"></param>
+            <param name="whichuser"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddAlert(GIPManager.AlertTable,System.String,System.Int32,System.Int32,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="alertTable"></param>
+            <param name="comment"></param>
+            <param name="fromuser"></param>
+            <param name="whichuser"></param>
+            <param name="link"></param>
+            /// <param name="itemId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteAlert(GIPManager.AlertTable,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="alertTable"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteAlert(GIPManager.AlertTable)">
+            <summary>
+            
+            </summary>
+            <param name="alertTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.SendMessage(GIPManager.ChatTable,System.Int32,System.String,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="chatTable"></param>
+            <param name="id"></param>
+            <param name="text"></param>
+            <param name="idToUser"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.CreateApplication(GIPManager.ApplicationTable)">
+            <summary>
+            
+            </summary>
+            <param name="table"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.CreateSwitchForm(GIPManager.SwitchFormTable)">
+            <summary>
+            
+            </summary>
+            <param name="switchForm"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditSwitchForm(GIPManager.SwitchFormTable)">
+            <summary>
+            Ассинхронное изменение БП
+            </summary>
+            <param name="switchForm"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelSwitchForm(GIPManager.SwitchFormTable)">
+            <summary>
+            
+            </summary>
+            <param name="switchForm"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddContent(GIPManager.ContentOfOperations)">
+            <summary>
+            
+            </summary>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelContent(GIPManager.ContentOfOperations)">
+            <summary>
+            
+            </summary>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditContentAsync(GIPManager.ContentOfOperations)">
+            <summary>
+            Изменение значений контента
+            </summary>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddSwitchSig(GIPManager.SwitchFormSignature)">
+            <summary>
+            
+            </summary>
+            <param name="signature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteApplication(GIPManager.ApplicationTable)">
+            <summary>
+            
+            </summary>
+            <param name="table"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditApplication(GIPManager.ApplicationTable)">
+            <summary>
+            
+            </summary>
+            <param name="table"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddSignature(GIPManager.AppSignature)">
+            <summary>
+            
+            </summary>
+            <param name="signature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AppCheckDisp(GIPManager.AppCheckDisp)">
+            <summary>
+            
+            </summary>
+            <param name="signature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AppOpenDisp(GIPManager.AppOpenDisp)">
+            <summary>
+            
+            </summary>
+            <param name="signature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AppCloseDisp(GIPManager.AppCloseDisp)">
+            <summary>
+            
+            </summary>
+            <param name="signature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.CreateNotification(GIPManager.NotificationTable,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="notification"></param>
+            <param name="userId"></param>
+            <param name="typeId"></param>
+            <param name="idApp"></param>
+            <param name="whirchId"></param>
+        </member>
+        <member name="M:GIPManager.Helper.DeleteNotification(GIPManager.NotificationTable)">
+            <summary>
+            
+            </summary>
+            <param name="notification"></param>
+        </member>
+        <member name="M:GIPManager.Helper.AddMarquee(GIPManager.MarqueeTable)">
+            <summary>
+            Создание бегущей строки
+            </summary>
+            <param name="marquee"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelMarquee(GIPManager.MarqueeTable)">
+            <summary>
+            Удаление бегущей строки
+            </summary>
+            <param name="marquee"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.CreatePhonegram(GIPManager.PhonegramTable)">
+            <summary>
+            Создание телефонограммы
+            </summary>
+            <param name="phonegramTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelPhonegram(GIPManager.PhonegramTable)">
+            <summary>
+            Удаление телефонограммы
+            </summary>
+            <param name="phonegramTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddComment(GIPManager.OperationalLog)">
+            <summary>
+            Метод добавление записей в оперативный журнал
+            </summary>202
+            <param name="operational"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddCommentAsync(GIPManager.OperationalLog)">
+            <summary>
+            Асинхронный метод добавление записей в оперативный журнал
+            </summary>
+            <param name="operational"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddVisa(GIPManager.OperationalLog)">
+            <summary>
+            Метод добавление визы/замечания в оперативный журнал
+            </summary>
+            <param name="operational"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelComment(GIPManager.OperationalLog)">
+            <summary>
+            
+            </summary>
+            <param name="operational"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddEventHistoryAsync(GIPManager.EventHistory)">
+            <summary>
+            Асинхронный метод добавление записей в Веб-Архив
+            </summary>
+            <param name="eventHistory"></param>
+        </member>
+        <member name="M:GIPManager.Helper.AddExFile(GIPManager.ExcelFileTable)">
+            <summary>
+            Добавить График Дежурств
+            </summary>
+            <param name="excelFile"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.EditExFile(GIPManager.ExcelFileTable)">
+            <summary>
+            Изменить График Дежурств
+            </summary>
+            <param name="excelFile"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddEvent(GIPManager.EventTable)">
+            <summary>
+            Добавление события в календаре
+            </summary>
+            <param name="eventTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelEvent(GIPManager.EventTable)">
+            <summary>
+            Удаление события в календаре
+            </summary>
+            <param name="eventTable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddDoc(GIPManager.Documents)">
+            <summary>
+            Добавление документа
+            </summary>
+            <param name="documents"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.DelDoc(GIPManager.Documents)">
+            <summary>
+            Удаление документа
+            </summary>
+            <param name="documents"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.Helper.AddOperationalScheme(GIPManager.OperationalScheme)">
+            <summary>
+            Добавление оперативной схемы
+            </summary>
+            <param name="operationalScheme"></param>
+            <returns></returns>
+        </member>
+        <member name="T:GIPManager.UsersManager">
+            <summary>
+            Препоставляет методы для работы с Таблицей пользователей в БД
+            </summary>
+        </member>
+        <member name="M:GIPManager.UsersManager.#ctor(GIPManager.StoreContext)">
+            <summary>
+            
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:GIPManager.UsersManager.AddUser(GIPManager.User,System.Int32)">
+            <summary>
+            Добавляет нового пользователя в БД
+            </summary>
+            <param name="user">Инфа о новом пользователе</param>
+            <param name="idWorker"></param>
+        </member>
+        <member name="M:GIPManager.UsersManager.AddWorker(GIPManager.Worker)">
+            <summary>
+            
+            </summary>
+            <param name="worker"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIPManager.UsersManager.DeleteUser(System.Int32)">
+            <summary>
+            Удаляем пользователя из БД по Id
+            </summary>
+            <param name="userId">Id пользователя, которого нужно удалить из БД</param>
+        </member>
+        <member name="M:GIPManager.UsersManager.DeleteWorker(System.Int32)">
+            <summary>
+            Удаляем рабочего из БД по Id
+            </summary>
+            <param name="userId"></param>
+        </member>
+        <member name="M:GIPManager.UsersManager.UpdateUserInfo(System.Int32,System.String,System.String,System.String)">
+            <summary>
+            Изменить инфу пользователя в БД (Логин, e-mail, Имя).
+            </summary>
+            <param name="userId">Id пользователя, данные которого нужно изменить в БД</param>
+            <param name="login">Новый Логин (используется для входа в систему)</param>
+            <param name="eMail">Новый e-mail</param>
+            <param name="name">Новое Имя пользователя (не логин, просто инфо)</param>
+        </member>
+        <member name="M:GIPManager.UsersManager.UpdateWorkerInfo(System.Int32,System.String)">
+            <summary>
+            Изменить инфу рабочего в БД (Имя).
+            </summary>
+            <param name="userId"></param>
+            <param name="name"></param>
+        </member>
+        <member name="M:GIPManager.UsersManager.UpdatePass(System.Int32,System.String)">
+            <summary>
+            Установить новый пароль
+            </summary>
+            <param name="userId">Id пользователя, данные которого нужно изменить в БД</param>
+            <param name="newPassword">Новый пароль</param>
+        </member>
+        <member name="M:GIPManager.UsersManager.UpdateRole(System.Int32,System.Int32)">
+            <summary>
+            Изменение роли
+            </summary>
+            <param name="userId">Id пользователя, данные которого нужно изменить в БД</param>
+            <param name="newRoleId">Id новой роли</param>
+        </member>
+        <member name="M:GIPManager.UsersManager.UpdateType(System.Int32,System.Int32)">
+            <summary>
+            Изменение тип рабочего
+            </summary>
+            <param name="userId"></param>
+            <param name="newRoleId"></param>
+        </member>
+        <member name="M:GIPManager.UsersManager.AddImageForUser(GIPManager.User)">
+            <summary>
+            
+            </summary>
+            <param name="user"></param>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetDeiceTypes(System.Int32)">
+            <summary>
+            Получить кол-во счетчиков по моделям на подстанции
+            </summary>
+            <param name="substationId"> id подстанции</param>
+            <returns>Сгрупиррованый список</returns>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetSubstationDevices(System.Int32)">
+            <summary>
+            Получить доп оборудование привязанное к подстанции
+            </summary>
+            <param name="substationId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetMountersKdeTypes(System.Int32)">
+            <summary>
+            Получить кол-во кде на постанции по типам по отчетам монтажников
+            </summary>
+            <param name="substationId">id подстанции</param>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetKdeTypesStore(System.Int32)">
+            <summary>
+            Получить кол-во кде на постанции по типам по привязке на складе
+            </summary>
+            <param name="substationId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetMaterials(System.Int32)">
+            <summary>
+            Получение списка использованных материалов на ТП
+            </summary>
+            <param name="substationId">id подстанции</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetSubstationSets(System.Int32)">
+            <summary>
+            Получить список комплектов на подстанции 
+            </summary>
+            <param name="substationId">Id подстанции</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.MaterialsByObject.GetSetMaterials(System.Int32)">
+            <summary>
+            Получить список материалов из комплектов
+            </summary>
+            <param name="substationId"></param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:StoreGIPManager.MaterialsByObject.GetSBTT(System.Int32)" -->
+        <member name="T:StoreGIPManager.RegPoint.RegPointInfo">
+            <summary>
+            Инфо по точке учета для отчетов на оплату подрядчикам
+            </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.RegPointId">
+            <summary> Id точки учета (номер акта) </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.RegPointStatus">
+            <summary> Тип устройства (ПУ, УСПД, plc модем) </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.RegionName">
+            <summary> Имя района в котором установлена точка учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.InstallPlace">
+            <summary> Место установки точки учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.SubstationId">
+            <summary> Id подстанции в которой установлена точка учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.SubstationName">
+            <summary> Название подстанции в которой установлена точка учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.OAddress">
+            <summary> Адрес по которому установлена точка учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.UAddress">
+            <summary> Юридический адрес потребителя </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.DeviceId">
+            <summary> Id устройства привязанного к точке учета </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.WorkerId">
+            <summary> Id работника к кому привязано устройство </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.WorkerFName">
+            <summary> Имя работника к кому привязано устройство </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.WorkerLName">
+            <summary> Фамилия работника к кому привязано устройство </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.WorkerMName">
+            <summary> Отчество работника к кому привязано устройство </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.DeviceDescription">
+            <summary> Описание типа устройства (1ф 3ф и тд) </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.DeviceModel">
+            <summary> Модель устройства полное наименование </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.Serial">
+            <summary> Серийный номер устройства </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.PhoneNumber">
+            <summary> Номер сим карты в модеме (встроенном либо на подстанции) </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.IsLinkOk">
+            <summary> Проверена ли связь с устройством </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.IsAscueChecked">
+            <summary>ПУ повторно проверен и будет заведён в ПО АСКУЭ</summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.IsAscueOk">
+            <summary>ПУ работает в ПО АСКУЭ</summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.IsReplace">
+            <summary>Замена ПУ</summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.DateAdd">
+            <summary> Дата создания точки учета в БД </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.IsInPayReportAlready">
+            <summary> Прикреплена ли точка учета к отчету на оплату </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.PaymentReportId">
+            <summary> Id отчета на оплату к которому привязана точка учета (если нет, то 0) </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.PaymentReportRegPointId">
+            <summary> Id элемента в отчете </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.CostRUB">
+            <summary> Цена за точку учета, если точна не в отчете то 0 руб. </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.WorkType">
+            <summary> Тип работ при оплате: монтажб демонтаж или ПНР </summary>
+        </member>
+        <member name="P:StoreGIPManager.RegPoint.RegPointInfo.DatePeriodStart">
+            <summary> Дата отчета (если с 1 по 15 то Аванс, если с 16 и выше то Расчет). В одном месяце только два отчета: Аванс и Расчет </summary>
+        </member>
+        <member name="M:StoreGIPManager.Substation.SubstationRepository.NearSubstations(System.Int32)">
+            <summary>
+            Список подстанции в том же районе что и эта подстанция (substationId)
+            </summary>
+            <param name="substationId">Id подстанции</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.Substation.SubstationRepository.RegPoints(System.Int32)">
+            <summary>
+            Список точек учета по подстанции
+            </summary>
+            <param name="id">Id подстанции</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.Worker.PaymentReportsManager.GetWorkerRegPointsInfo(System.Int32)">
+            <summary> Список точек учета связанных с монтажником, возвращает список RegPointInfo, в которых содержится вся основная информация о точках учета </summary>
+            <param name="workerId">Id работника</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.Worker.PaymentReportsManager.GetAvailableWorkerRegPointsInfo(System.Int32)">
+            <summary> Список точек учета связанных с монтажником, не прикрепленный к отчету на оплату </summary>
+            <param name="workerId">Id работника</param>
+            <returns></returns>
+        </member>
+        <member name="M:StoreGIPManager.Worker.PaymentReportsManager.GetWorkerPaymentReports(System.Int32)">
+            <summary>
+            Получает список отчетов на оплату, привязанных к работнику
+            </summary>
+        </member>
+        <member name="M:StoreGIPManager.Worker.PaymentReportsManager.GetPointsInReport(System.Int32)">
+            <summary>
+            Получает список отчетов на оплату, привязанных к работнику
+            </summary>
+        </member>
+    </members>
+</doc>
